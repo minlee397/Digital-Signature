@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Demo Chữ ký số - An Ning Mạng</title>
+
+<link rel="stylesheet" type="text/css" href="./assets/css/bootstrap.css">
+<script type="text/javascript" src="./assets/js/JQuery.js"></script>
+
+<script type="text/javascript" src="./assets/js/bootstrap.js"></script>
+<script type="text/javascript" src="./assets/js/pdf.js"></script>
+<script type="text/javascript" src="./assets/js/pdf.worker.js"></script>
+
+<script type="text/javascript" src="./assets/js/MyJS.js"></script>
+
+
+<script type="text/javascript" src="./node_modules/jsrsasign/lib/jsrsasign-all-min.js"></script>
+<script type="text/javascript" src="./assets/js/md5.js"></script>
+<script type="text/javascript" src="./assets/js/sha1.js"></script>
+<script type="text/javascript" src="./assets/js/sha256.js"></script>
+<script type="text/javascript" src="./assets/js/sha512.js"></script>
+
+</head>
+
+<style type="text/css">
+
+body{
+	font-family: Tahoma,Verdana,Segoe,sans-serif; 
+}
+
+.wapper{
+	width:100%;
+
+	position: relative;
+}
+
+.loading{
+	position: absolute;
+	left:45%;
+	top:45%;
+	z-index: 1;
+}
+
+.Header{
+	text-align: center;
+	color: #0066ff;
+	font-size: 35px;
+	font-weight: bold;
+	
+	padding: 2% 0;	
+}
+
+.navbar-default{
+	background-color: #0066ff;
+	border-color: #0066ff; 
+}
+
+.navbar-default .navbar-brand{
+	color: #fff;
+}
+
+.navbar-default .navbar-brand:hover{
+	color:#fff;
+	background-color: #1a75ff;	
+}
+
+.navbar-default .navbar-nav > li > a{
+	color:#fff;
+}
+
+.navbar-default .navbar-nav > li > a:hover{
+	color:#fff;
+	background-color: #1a75ff;	
+}
+
+
+
+
+.Main{
+	
+}
+
+.title_sign{
+	text-align: center;
+	font-size: 25px;
+	font-weight: bold;
+	padding-bottom: 2%;
+}
+
+.methods_sign{
+	text-align: center;
+}
+
+.methods_sign button{
+	width: 100%;
+	padding: 5% 0%;
+	background: none;
+	border:none;
+	outline: none;
+}
+
+.methods_sign .open_doc{
+	background-color: #0066ff;
+	border:1px solid #0066ff;
+	color:#fff;
+	font-weight: bold;
+}
+
+.methods_sign .open_doc:hover{
+	background-color: #1a75ff;
+	transition-duration: 1s;
+}
+
+.methods_sign .reset_doc{
+	border:1px solid #0066ff;
+	font-weight: bold;
+}
+
+.methods_sign .reset_doc:hover{
+	background-color: #0066ff;
+	color:#fff;
+	transition-duration: 1s;
+}
+
+.box_generation_key{
+	padding-bottom: 2%;
+}
+
+.box_main{
+	padding-bottom: 3%;
+}
+
+.box_info_sign, .box_name_file{
+	margin-top: 1%;
+}
+
+.box_text, .box_img, .box_pdf, .box_video, .box_other_file{
+	display: none;
+}
+
+.box_message_verify{
+	text-align: center;
+	font-weight: bold;
+	font-size: 20px;
+}
+
+.message_value_verify_right{
+	color:#006600;
+}
+
+.message_value_verify_wrong{
+	color:#cc0000;
+}
+
+.copy_style{
+	cursor: pointer;
+}
+
+.Footer{
+	background-color: #0066ff;
+	padding: 0.5%;
+	color:#fff; 
+}
+</style>
+
+<body>
+<div class="wapper">
+	<div id="loading" class="loading"><img src="./assets/img/loading.gif" width="70%" height="70%"></div>
+	<div class="container-fluid">
+		<div class="row Header">
+			DEMO CHỮ KÝ SỐ VỚI CÁC LOẠI FILE (PDF, IMAGES, TEXT, VIDEO)
+		</div>
+		<div class="row Menu">
+			<nav class="navbar navbar-default">
+			  <div class="container-fluid">
+			    <div class="navbar-header">
+			      <a class="navbar-brand" href="#">Demo</a>
+			    </div>
+			    <ul class="nav navbar-nav">
+			      <li><a href="#" id="menu_generation_key">Khởi Tạo Key</a></li>
+			      <li><a href="#" id="menu_sign">Ký Tài Liệu</a></li>
+			      <li><a href="#" id="menu_verify">Xác Thực Tài Liệu</a></li>
+			      
+			    </ul>
+			  </div>
+			</nav>	
+		</div>
+		<div class="row Main">
+			<div class="col-sm-12 box_main" id="_menu_generation_key">
+				<div class="row title_sign">
+					<div class="col-sm-12">KHỞI TẠO CẶP KEY RSA</div>
+				</div>
+				<div class="row">
+					<div class="col-sm-3 box_generation_key">
+						<select class="form-control" id="list_type_pub">
+						    <option value="0">Chọn loại public key</option>
+						    <option value="1">Public Key</option>
+						    <option value="2">Public Key X.509 Certificate</option>						    
+						  </select>
+					</div>
+					<div class="col-sm-3 box_generation_key">
+						<div class="form-group">						  
+						  <select class="form-control" id="list_len_rsa">
+						    <option value="0">Chọn kích thước</option>
+						    <option value="256">256</option>
+						    <option value="512">512</option>
+						    <option value="1024">1024</option>
+						    <option value="2048">2048</option>
+						    <option value="4096">4096</option>
+						  </select>
+						</div>
+					</div>
+					<div class="col-sm-4 box_generation_key">
+						<button id="execute_generation_key" class="btn btn-primary">Tạo Cặp Key</button>
+					</div>
+				</div>
+				<div class="row main_sign">
+					<div class="col-sm-6">
+						<div class="form-group">
+					      <label for="comment">Public Key: &nbsp&nbsp <span id="copy_public_key" class="glyphicon glyphicon-duplicate copy_style" data-toggle="tooltip" data-placement="top" title="Sao chép!"></span></label>					      
+					      <textarea class="form-control" rows="10" id="pub_key"></textarea>
+					    </div>
+					    <div class="form-group">
+					      <button class="btn btn-success" id="save_pub_key"><span class="glyphicon glyphicon-download-alt"></span> &nbsp&nbsp Public key</button>
+					    </div>
+					</div>
+					<div class="col-sm-6">
+						<div class="form-group">
+					      <label for="comment">Private Key: &nbsp&nbsp <span id="copy_private_key" class="glyphicon glyphicon-duplicate copy_style"></label>
+					      <textarea class="form-control" rows="10" id="prv_key"></textarea>
+					    </div>
+					    <div class="form-group">
+					      <button class="btn btn-success" id="save_prv_key"><span class="glyphicon glyphicon-download-alt"></span> &nbsp&nbsp Private key</button>
+					    </div>
+					</div>
+				</div>
+				<div class="row main_sign box_message">
+					<div class="col-sm-12" id="message_value">
+						
+					</div>
+				</div>
+			</div>
+
+
+			<div class="col-sm-12 box_main" id="_menu_sign">
+				<div class="row title_sign">
+					<div class="col-sm-12">KÝ TÀI LIỆU BẰNG THUẬT TOÁN RSA</div>
+				</div>
+				<div class="row methods_sign">
+					<div class="col-sm-offset-4 col-sm-2">
+						<input id="fileInput" accept="text/plain, image/*, application/pdf, video/*" type="file" style="display:none;" />
+						<button class="open_doc" id="open_doc" type="button">
+							<span class="glyphicon glyphicon-folder-open"></span>  &nbsp&nbsp Mở Tài Liệu để ký
+						</button>
+					</div>
+					<div class="col-sm-2"><button class="reset_doc"><span class="glyphicon glyphicon-refresh"></span>  &nbsp&nbsp Đặt lại</button></div>
+				</div>
+				<div class="row box_name_file form-horizontal">					
+						<div class="form-group">
+					      	<label class="col-sm-1 control-label">Tên file</label>
+						    <div class="col-sm-5">
+						      <input class="form-control" id="name_file" readonly="" type="text">
+						    </div>	
+					    </div>				
+				</div>
+				<div class="row box_info_sign">				
+					<div class="col-sm-6">
+						<div class="row">
+							<div class="col-sm-12 form-group">
+						      <label for="comment">File Hash: &nbsp&nbsp <span id="copy_hash_file" class="glyphicon glyphicon-duplicate copy_style" data-toggle="tooltip" data-placement="top" title="Sao chép!"></span></label>
+						      <textarea readonly="" class="form-control" rows="4" id="hash_file"></textarea>
+						    </div>
+						    <div class="form-group col-sm-5">							
+								  <select class="form-control" id="list_hash">
+								    <option value="0">Chọn thuật toán băm</option>
+								    <option value="MD5">MD5</option>
+								    <option value="MD5">SHA1</option>
+								    <option value="SHA256">SHA256</option>
+								    <option value="SHA512">SHA512</option>								    
+								  </select>		
+							</div>													
+						   	<div class="col-sm-2"><button id="btn_hash_file" class="btn btn-primary">Mã hóa file</button></div>
+						</div>
+						<div class="row">
+							<div class="col-sm-12 form-group">
+						      <label for="comment">chữ ký (Private Key)</label>
+						      <textarea class="form-control" rows="6" id="signature"></textarea>
+						    </div>						    
+						</div>				
+						<div class="row">
+							<div class="col-sm-12 form-group">
+						      <label for="comment">File + chữ ký &nbsp&nbsp <span id="copy_signature" class="glyphicon glyphicon-duplicate copy_style" data-toggle="tooltip" data-placement="top" title="Sao chép!"></label>
+						      <textarea class="form-control" rows="6" id="signature_file"></textarea>
+						    </div>
+						    <div class="form-group col-sm-5">							
+								  <select class="form-control" id="list_hash_sign">
+								    <option value="0">Chọn thuật toán để ký</option>
+								    <option value="md5">MD5</option>
+								    <option value="sha1">SHA1</option>
+								    <option value="sha256">SHA256</option>
+								    <option value="sha512">SHA512</option>			
+								  </select>		
+							</div>													
+						   	<div class="col-sm-2"><button id="btn_sign_hash_file" class="btn btn-danger">Ký mã hóa file</button></div>
+						</div>	
+						<div class="row main_sign box_message">
+							<div class="col-sm-12" id="message_value_sign">
+								
+							</div>
+						</div>										   	
+					</div>
+					<div class="col-sm-6 box_text" id="box_text">
+						<div class="form-group">
+					      <label for="comment">Nội dung file:</label>
+					      <textarea readonly="" class="form-control" rows="15" id="content_file"></textarea>
+					    </div>
+					</div>
+					<div class="col-sm-6 box_video" id="box_video">
+						<div class="form-group">
+					      <label for="comment">Nội dung file:</label>
+					      <video id="video" width="100%" controls>
+						    	
+						  </video>
+					    </div>
+					</div>
+					<div class="col-sm-6 box_pdf" id="box_pdf">
+						<div class="form-group" >
+					      <label for="comment">Nội dung file:</label>					      
+					      <embed id="pdf-show" width="100%" height="" />
+					    </div>					    					
+					</div>	
+					<div class="col-sm-6 box_other_file" id="box_other_file">
+						<div class="form-group">
+					      <label for="comment">Nội dung file:</label>
+					      <div id="other_file" width="100%" height="600px">File này không thể hiện thị nội dung</div>
+					    </div>						
+					</div>
+					<div class="col-sm-6 box_img" id="box_img">
+						<div class="form-group">
+					      <label for="comment">Nội dung file:</label>
+					      <img id="img_file" src="" width="100%" height="100%"></div>
+					    </div>						
+					</div>
+					
+				</div>				
+			</div>
+
+			<div class="col-sm-12 box_main" id="_menu_verify">
+				<div class="row title_sign">
+					<div class="col-sm-12">XÁC THỰC TÀI LIỆU THUẬT TOÁN RSA</div>
+				</div>				
+				<div class="row box_info_sign">				
+					<div class="col-sm-6">
+						<div class="row">
+							<div class="col-sm-12 form-group">
+						      <label for="comment">File Hash:</label>
+						      <textarea class="form-control" rows="4" id="hash_file_verify"></textarea>
+						    </div>						    
+						</div>
+						<div class="row">
+							<div class="col-sm-12 form-group">
+						      <label for="comment">Chữ ký để xác thực:</label>
+						      <textarea  class="form-control" rows="6" id="signatured_string"></textarea>
+						    </div>						    
+						</div>
+						
+					</div>
+					<div class="col-sm-6">
+						<div class="row">
+							<div class="col-sm-12 form-group">
+						      <label for="comment">Public key:</label>
+						      <textarea class="form-control" rows="10" id="pubkey_verify"></textarea>
+						    </div>						    
+						</div>
+						<div class="row">
+							<div class="col-sm-12 form-group">
+						      <button class="btn btn-danger" id="btn_verify_hash_file">Xác thực</button>
+						    </div>						    
+						</div>						
+					</div>									
+				</div>
+				<div class="row box_message_verify">
+					<div class="col-sm-12" id="message_value_verify">
+						
+					</div>
+				</div>
+			</div>
+		</div>
+		<div class="row Footer">
+			<div class="col-sm-12">&copy copyright - An ninh mạng - Nhóm 8
+		</div>
+	</div>
+</div>
+</body>
+
+</html>
